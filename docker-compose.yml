@@ -1,0 +1,11 @@
+package:
+    build: .
+    container_name: xmlstarlet
+    environment:
+        - PACKAGER="Sebastian Menski <sebastian@menski.org>"
+
+test:
+    image: xmlstarlet:abuild
+    container_name: xmlstarlet-test
+    entrypoint: sh
+    command: -c "sudo apk add --allow-untrusted --upgrade /packages/x86_64/*.apk"

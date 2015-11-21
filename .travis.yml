@@ -1,0 +1,30 @@
+language: generic
+
+sudo: required
+
+services:
+    - docker
+
+before_script:
+    - echo "$RSA_PRIVATE_KEY" | base64 -d > abuild.rsa
+    - echo "$RSA_PUBLIC_KEY" | base64 -d > abuild.rsa.pub
+    - docker-compose up package
+    - docker commit xmlstarlet xmlstarlet:abuild
+    - docker cp xmlstarlet:/packages .
+    - ls -al packages/*
+
+script:
+    - docker-compose up test
+
+deploy:
+    provider: releases
+    api_key:
+        secure: DfQocMzPMzkEQszNotHd5F2qUv3zvLg+gYHwhe8eV+uBbJE5t+ane1iFY3SpCVBrfoVt3rcVxRAokedRGcQcCl7uc9fUFHDl2Q9E9Nn2LEsaravTa6qNDRTcF394/yxm0Y8KkGlUF31voMFTGAuH8KOFskCOsOSu308ozD++zjlreNOHTX5NbDYJKPQ3UDzUG0MxRFnl0fK8PdXTMKxdFf3eSnbthi9yuoByxiG0j2vbGzaKM87L9QI0BD9YXaCTjlaVEMDlNvrkFc8DYVA0Y+FdjX8Z7w7EIk+9RgrtiYQMEGaWnWr0EoCYsdTBi3cn8M3EsnE0aM403LWw2bZ5TwT2mXGBcMyYGFxjnFZObHPky6+OX/K3KOYmcVvTraWaA2evAOJG5QEOg5Sqk/q78JZXtfznvG9SxtJZjBRMM2NAjyJyL0kO4h1lk+EzSE/3HKyYXmsU9OJGlx6IN5XK7yaI70oT8zDpgilt5vJ48sNRKDsSuq1EwveEYnQZBLnmmE4xe+9FK3lCo7Ty6OXS5uMU0C65BX4oY3XjVRGCE2RXSMI1VnaXPwbKcWo6FQdF9mmCyTccVnlfAHg4UX6Pjx069a/8MRcrK/9JFSAsgfXb2yCakVkIhjOB9JwgJVbjtrzg7tFNLDa5jdozBE6yu5lUcXw6Jslp+pRTTjZiGp0=
+    skip_cleanup: true
+    file:
+        - packages/x86_64/APKINDEX.tar.gz
+        - packages/x86_64/xmlstarlet-${TRAVIS_TAG}.apk
+        - packages/x86_64/xmlstarlet-doc-${TRAVIS_TAG}.apk
+    on:
+        tags: true
+        repo: menski/alpine-pkg-xmlstarlet
